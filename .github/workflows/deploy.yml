@@ -110,7 +110,48 @@
 #           github_token: ${{ secrets.GH_DEPLOY_TOKEN }}
 #           publish_dir: ./build
 
-name: GitHub Pages
+# name: GitHub Pages
+
+# on:
+#   pull_request:
+#     branches:
+#       - main
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-22.04
+#     permissions:
+#       contents: write
+#     concurrency:
+#       group: ${{ github.workflow }}-${{ github.ref }}
+#     steps:
+#       - uses: actions/checkout@v3
+
+#       - name: Setup Node
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: "20"
+
+#       - name: Cache dependencies
+#         uses: actions/cache@v3
+#         with:
+#           path: ~/.npm
+#           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+#           restore-keys: |
+#             ${{ runner.os }}-node-
+
+#       - run: npm ci
+#       - run: npm run build
+
+#       - name: Deploy
+#         uses: peaceiris/actions-gh-pages@v4
+#         if: github.ref == 'refs/heads/main'
+#         with:
+#           github_token: ${{ secrets.GH_DEPLOY_TOKEN }}
+#           publish_dir: ./build
+#           publish_branch: gh-pages
+
+name: Deploy React App to GitHub Pages
 
 on:
   pull_request:
@@ -118,34 +159,26 @@ on:
       - main
 
 jobs:
-  deploy:
-    runs-on: ubuntu-22.04
-    permissions:
-      contents: write
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      - name: Setup Node
-        uses: actions/setup-node@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
-          node-version: "20"
+          node-version: "14" # or any version you are using
 
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+      - name: Install dependencies
+        run: npm install
 
-      - run: npm ci
-      - run: npm run build
+      - name: Build the app
+        run: npm run build
 
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v4
-        if: github.ref == 'refs/heads/main'
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GH_DEPLOY_TOKEN }}
           publish_dir: ./build
